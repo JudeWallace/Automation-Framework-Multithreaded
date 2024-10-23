@@ -1,5 +1,9 @@
 # Automation Suite Framework
 
+## Table of Contents
+* [How to use](#how-to-use)
+* [Feature file tags](#feature-file-tags)
+
 ## How to use
 ### Local Execution
 The suite is run through a bash script called run-test-suite.sh <br>
@@ -17,6 +21,7 @@ cd /path/to/project/ && ./run-test-suite.sh "REPLACE_WITH_TAGS"
 
 This command initiates the automation suite with the specified tags. As it is a local execution, the suite will run in a headed state 
 
-
+## Feature file tags
+add details about what tags can be used and what they do
 
 

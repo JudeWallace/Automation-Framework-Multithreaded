@@ -17,8 +17,8 @@ target/
 ## ##
 
 
-## Enviroment Variables - given upon request ##
+## Misc ##
 .env
-
-### Mac OS ###
+/.env
+*.env
 .DS_Store
