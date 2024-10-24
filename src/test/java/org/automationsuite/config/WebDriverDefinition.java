@@ -12,7 +12,10 @@ import java.util.function.Supplier;
 public enum WebDriverDefinition {
 
     WEBKIT(() -> {
+
         if(!Boolean.parseBoolean(System.getenv("PIPELINE_EXECUTION"))) {
+            System.setProperty("webdriver.chrome.driver", "src/test/resources/chromedriver.exe");
+
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--remote-allow-origins=*");
             return new ChromeDriver(options);
