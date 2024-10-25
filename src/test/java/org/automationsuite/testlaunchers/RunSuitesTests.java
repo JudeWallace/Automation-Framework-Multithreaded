@@ -6,12 +6,16 @@ import io.cucumber.core.options.RuntimeOptionsBuilder;
 import io.cucumber.core.runtime.Runtime;
 import io.cucumber.tagexpressions.TagExpressionParser;
 import lombok.extern.slf4j.Slf4j;
+import org.automationsuite.reporting.ExtentReportManager;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,7 +31,27 @@ public class RunSuitesTests {
         // Load all feature files
         List<String> featureFiles = loadFeatureFiles();
 
-        featureFiles.parallelStream().forEach(this::runFeatureFile);
+        // Define a fixed thread pool with a size of 3 (or any number you need)
+        int threadCount = 2;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            // Submit each feature file to the thread pool
+            featureFiles.forEach(featureFile -> executorService.submit(() -> runFeatureFile(featureFile)));
+        } finally {
+            // Shutdown the executor service gracefully after all tasks are completed
+            executorService.shutdown();
+            try {
+                // Wait for all threads to complete execution
+                if (!executorService.awaitTermination(10, TimeUnit.MINUTES)) {
+                    executorService.shutdownNow();
+                }
+                ExtentReportManager.flushReport();
+            } catch (InterruptedException e) {
+                log.error("Thread pool interrupted while waiting for termination", e);
+                executorService.shutdownNow();
+            }
+        }
     }
 
     private void runFeatureFile(String featureFile) {

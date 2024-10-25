@@ -6,6 +6,7 @@ import io.cucumber.core.options.RuntimeOptionsBuilder;
 import io.cucumber.core.runtime.Runtime;
 import io.cucumber.tagexpressions.TagExpressionParser;
 import lombok.extern.slf4j.Slf4j;
+import org.automationsuite.reporting.ExtentReportManager;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -40,8 +41,9 @@ public class SerialExecutionTestIGNORE {
 
         try {
             runtime.run();
+            ExtentReportManager.flushReport();
         } catch (Exception ex) {
-            //System.exit(1);
+            System.exit(1);
         }
     }
 }

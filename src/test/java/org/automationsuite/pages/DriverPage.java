@@ -31,7 +31,7 @@ public class DriverPage {
      */
     public void createWebBrowser() {
         if (driver == null) {
-            driver = WebDriverDefinition.WEBKIT.createDriver(); // Create new WebDriver
+            driver = WebDriverDefinition.WEBKIT.createDriver();
             driver.manage().window().setSize(new Dimension(1920, 1080));
             driver.manage().window().maximize();
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));

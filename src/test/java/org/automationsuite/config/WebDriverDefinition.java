@@ -17,7 +17,7 @@ public enum WebDriverDefinition {
             System.setProperty("webdriver.chrome.driver", "src/test/resources/chromedriver.exe");
 
             ChromeOptions options = new ChromeOptions();
-            options.addArguments("--remote-allow-origins=*");
+            options.addArguments("--remote-allow-origins=*");//, "--headless");
             return new ChromeDriver(options);
         }
         else {

@@ -1,17 +1,25 @@
 package org.automationsuite.steps;
 
+import io.cucumber.java.AfterStep;
 import io.cucumber.java.Scenario;
 import org.automationsuite.pages.BasePage;
-import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.After;
 import org.automationsuite.pages.PageManager;
+import org.automationsuite.reporting.ExtentReportManager;
 
 public class Hooks extends BasePage {
 
     @Before
     public void beforeScenarioSetup(Scenario scenario){
         pageIndex().getDriverPage().createWebBrowser();
-        // create a web browser
+        ExtentReportManager.beforeScenario(scenario);
+    }
+
+    @AfterStep
+    public void afterScenarioStep(){
+        ExtentReportManager.afterScenarioStep();
+
     }
 
     @After
@@ -19,5 +27,6 @@ public class Hooks extends BasePage {
         // Exit driver thread
         pageIndex().getDriverPage().driverShutdown();
         PageManager.cleanup();
+        ExtentReportManager.afterScenarioCleanup();
     }
 }
