@@ -5,7 +5,10 @@ pipelines:
     - step:
         name: Build & Test
         services:
-          - selenium
+          - selenium-hub
+          - chrome-node-1
+          - chrome-node-2
+          - chrome-node-3
         script:
           - echo "Building and running automation suite."
           - chmod +x mvnw
@@ -13,8 +16,31 @@ pipelines:
           - ./mvnw clean test
         artifacts:
           - target/logs/executionLog.log
-          - target/ExtentReports/AutomationSuiteReport.html
+          - target/executionReports/IHI_Automation_Report.html
+
 definitions:
   services:
-    selenium:
-      image: selenium/standalone-chrome
+    selenium-hub:
+      image: selenium/hub:4.0.0
+      ports:
+        - "4444"
+    chrome-node-1:
+      image: selenium/node-chrome:4.0.0
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+    chrome-node-2:
+      image: selenium/node-chrome:4.0.0
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+    chrome-node-3:
+      image: selenium/node-chrome:4.0.0
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
