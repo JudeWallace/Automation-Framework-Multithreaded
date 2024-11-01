@@ -31,7 +31,7 @@ public class ParallelExecutionTest {
                 List<String> featureFiles = loadFeatureFiles();
 
                 // Define a fixed thread pool with a size of 3
-                int threadCount = 3;
+                int threadCount = 2;
                 ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
                 try {
