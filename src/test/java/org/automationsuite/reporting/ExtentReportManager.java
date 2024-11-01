@@ -2,16 +2,24 @@ package org.automationsuite.reporting;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.gherkin.model.*;
 import com.aventstack.extentreports.markuputils.ExtentColor;
 import com.aventstack.extentreports.markuputils.MarkupHelper;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.aventstack.extentreports.reporter.configuration.Theme;
+import com.aventstack.extentreports.reporter.configuration.ViewName;
 import io.cucumber.core.backend.TestCaseState;
 import io.cucumber.java.Scenario;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.automationsuite.pages.BasePage;
+import org.automationsuite.plugins.CucumberStepListener;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 
 import java.lang.reflect.Field;
 import java.util.Deque;
@@ -19,9 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExtentReportManager {
-    private static ExtentReports extentReports = init();
-    private static ConcurrentHashMap<String, ExtentTest> featureTests = new ConcurrentHashMap<>();
+@Slf4j
+public class ExtentReportManager extends BasePage {
+    private static final ExtentReports extentReports = init();
+    private static final ConcurrentHashMap<String, ExtentTest> featureTests = new ConcurrentHashMap<>();
 
     private static final ThreadLocal<Scenario> threadLocalScenario = new ThreadLocal<>();
     private static final ThreadLocal<ExtentTest> threadLocalScenarioTest = new ThreadLocal<>();
@@ -33,6 +42,17 @@ public class ExtentReportManager {
         sparkReporter.config().setDocumentTitle("Automation Test Report");
         sparkReporter.config().setReportName("Test Execution Results");
         sparkReporter.config().setTheme(Theme.DARK);
+        sparkReporter.config().thumbnailForBase64(true);
+        sparkReporter.viewConfigurer().viewOrder().as(new ViewName[]{ViewName.DASHBOARD, ViewName.TEST, ViewName.LOG, ViewName.CATEGORY}).apply();
+
+        sparkReporter.config().setCss(
+                ".container { max-width: 100%; overflow-x: hidden; } " + // Ensure main container fits
+                        ".col, .card-panel { max-width: 100%; overflow-x: hidden; } " + // Fit columns and panels
+                        "img { max-width: 100%; height: auto; display: block; margin: auto; } " + // Resize images
+                        ".log-text { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }" +
+                        ".card-title .node span { color: white; font-weight: bold; }"// Wrap text logs
+        );
+
 
         ExtentReports extentReports = new ExtentReports();
         extentReports.attachReporter(sparkReporter);
@@ -43,10 +63,8 @@ public class ExtentReportManager {
         threadLocalScenario.set(scenario);
 
         String featureFileName = FilenameUtils.getBaseName(threadLocalScenario.get().getUri().toString());
-        System.out.println("Thread: " + Thread.currentThread().threadId() + " running scenarios in -> " + featureFileName);
 
         ExtentTest featureTest = featureTests.computeIfAbsent(featureFileName, name -> extentReports.createTest(name));
-        System.out.println(threadLocalScenario.get().getName());
         ExtentTest scenarioNode = featureTest.createNode(threadLocalScenario.get().getName());
         threadLocalScenarioTest.set(scenarioNode);
 
@@ -56,11 +74,18 @@ public class ExtentReportManager {
     public static void afterScenarioStep(){
         if(!threadLocalScenarioSteps.get().isEmpty()){
             PickleStepTestStep step = threadLocalScenarioSteps.get().pop();
-            logStep(step);
+            logStep(step, false);
         }
     }
 
     public static void afterScenarioCleanup(){
+        if(!threadLocalScenarioSteps.get().isEmpty()) {
+            while (!threadLocalScenarioSteps.get().isEmpty()){
+                PickleStepTestStep step = threadLocalScenarioSteps.get().pop();
+                logStep(step, true);
+            }
+        }
+
         threadLocalScenarioTest.remove();
         threadLocalScenarioSteps.remove();
 
@@ -111,8 +136,8 @@ public class ExtentReportManager {
         return scenarioSteps;
     }
 
-    private static void logStep(PickleStepTestStep step){
-        String stepText = step.getStep().getText();
+    private static void logStep(PickleStepTestStep step, Boolean testPreviouslyFailed){
+        String stepText = "<span style='color: white; font-weight: bold;'>" + step.getStep().getText() + "</span>";
         String keyword = step.getStep().getKeyword().toLowerCase().trim();
         ExtentTest stepNode;
 
@@ -125,11 +150,24 @@ public class ExtentReportManager {
             default -> throw new IllegalStateException("Unexpected value: " + keyword);
         }
 
-        if(threadLocalScenario.get().isFailed()){
-            // todo logic for failed step
+        if(threadLocalScenario.get().isFailed() && testPreviouslyFailed){
+            stepNode.skip(MarkupHelper.createLabel("This step has been skipped.", ExtentColor.ORANGE));
+        } else if(threadLocalScenario.get().isFailed()){
+            stepNode.fail(MarkupHelper.createLabel("Step has failed.", ExtentColor.RED));
+            // todo - fix this jank around error logging
+            //log.error("Error occurred in the \"{}\" step resulting in the error: {}", step.getStep().getText(), CucumberStepListener.getFailedStepError());
+            //stepNode.log(Status.INFO, MarkupHelper.createLabel(CucumberStepListener.getFailedStepError(), ExtentColor.BLUE));
+            stepNode.log(Status.INFO, "<div class='log-text'>" + CucumberStepListener.getFailedStepError() + "</div>");
+
+            stepNode.log(Status.INFO, MediaEntityBuilder.createScreenCaptureFromBase64String("data:image/png;base64," + takeScreenshot()).build());
         } else {
             stepNode.pass(MarkupHelper.createLabel("Step passed.", ExtentColor.GREEN));
         }
+    }
+
+    private static String takeScreenshot(){
+        // todo - ignore screenshot if PID
+        return ((TakesScreenshot) pageIndex().getDriverPage().getWebDriver()).getScreenshotAs(OutputType.BASE64);
     }
 
     public static void flushReport(){

@@ -13,13 +13,19 @@
         <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <cucumberV>7.11.1</cucumberV>
+        <cucumberV>7.20.1</cucumberV>
+        <junitV>4.13.2</junitV>
         <seleniumV>4.20.0</seleniumV>
         <jacksonV>2.15.1</jacksonV>
         <pdfboxV>3.0.2</pdfboxV>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junitV}</version>
+        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>

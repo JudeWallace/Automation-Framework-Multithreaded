@@ -11,6 +11,7 @@ public class PageManager{
     // Pages
     @Getter
     private final DriverPage driverPage = new DriverPage();
+    private final SharedFunctionalityPage sharedFunctionality = new SharedFunctionalityPage();
 
     //util
 
@@ -30,7 +31,7 @@ public class PageManager{
     /**
      * Clean up of the instance to save memory
      */
-    public static void cleanup(){
+    public static void cleanup() {
         instance.remove();
     }
 }

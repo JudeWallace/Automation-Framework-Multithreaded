@@ -18,6 +18,17 @@ public class TestSteps extends BasePage {
         Thread.sleep(2000);
     }
 
+    @Given("I navigate to the BBC News website")
+    public void iNavigateToTheBBNewsCWebsite() throws InterruptedException {
+        long threadId = Thread.currentThread().getId();
+        System.out.println("Running on thread: "+ threadId);
+
+        log.info("Navigating to the BBC News website");
+        pageIndex().getDriverPage().navigateToURL("https://www.bbc.co.uk/news");
+        Thread.sleep(2000);
+        shared().testBBCHeader();
+    }
+
     @And("I log a message {string}")
     public void iLogAMessage(String arg0) {
         log.info("Thread: " + Thread.currentThread().getId() + " logging execution " + arg0);
