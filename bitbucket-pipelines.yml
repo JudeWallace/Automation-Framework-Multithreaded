@@ -5,33 +5,20 @@ pipelines:
     - step:
         name: Build & Test
         services:
-          - selenium-hub
-          - chrome-node-1
-          - chrome-node-2
+          - docker
         script:
-          - echo "Building and running automation suite."
+          - echo "Starting Selenium Grid with multiple Chrome nodes"
+          - docker-compose up -d
+          - sleep 60
           - chmod +x mvnw
           - ./mvnw -v
           - ./mvnw clean test
+          - docker-compose down
         artifacts:
           - target/logs/executionLog.log
           - target/executionReports/IHI_Automation_Report.html
 
 definitions:
   services:
-    selenium-hub:
-      image: selenium/hub:4.0.0
-
-    chrome-node-1:
-      image: selenium/node-chrome:4.0.0
-      environment:
-        SE_EVENT_BUS_HOST: "selenium-hub"
-        SE_EVENT_BUS_PUBLISH_PORT: "4442"
-        SE_EVENT_BUS_SUBSCRIBE_PORT: "4443"
-
-      chrome-node-2:
-        image: selenium/node-chrome:4.0.0
-        environment:
-          SE_EVENT_BUS_HOST: "selenium-hub"
-          SE_EVENT_BUS_PUBLISH_PORT: "4442"
-          SE_EVENT_BUS_SUBSCRIBE_PORT: "4443"
+    docker:
+      memory: 4096
