@@ -13,7 +13,7 @@ pipelines:
           - ./mvnw clean test
         artifacts:
           - target/logs/executionLog.log
-          - target/ExtentReports/IHI_Automation_Report.html
+          - target/ExtentReports/AutomationSuiteReport.html
 definitions:
   services:
     selenium:
