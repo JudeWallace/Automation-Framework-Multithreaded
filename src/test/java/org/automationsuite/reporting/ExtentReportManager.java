@@ -29,15 +29,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class ExtentReportManager extends BasePage {
-    private static final ExtentReports extentReports = init();
-    private static final ConcurrentHashMap<String, ExtentTest> featureTests = new ConcurrentHashMap<>();
 
-    private static final ThreadLocal<Scenario> threadLocalScenario = new ThreadLocal<>();
-    private static final ThreadLocal<ExtentTest> threadLocalScenarioTest = new ThreadLocal<>();
-    private static final ThreadLocal<Deque<PickleStepTestStep>> threadLocalScenarioSteps = ThreadLocal.withInitial(LinkedList::new);
+    private final ExtentReports extentReports = init();
+    private final ConcurrentHashMap<String, ExtentTest> featureTests = new ConcurrentHashMap<>();
+
+    private final ThreadLocal<Scenario> threadLocalScenario = new ThreadLocal<>();
+    private final ThreadLocal<ExtentTest> threadLocalScenarioTest = new ThreadLocal<>();
+    private final ThreadLocal<Deque<PickleStepTestStep>> threadLocalScenarioSteps = ThreadLocal.withInitial(LinkedList::new);
 
 
-    private static ExtentReports init(){
+    private ExtentReports init(){
         ExtentSparkReporter sparkReporter = new ExtentSparkReporter("target/ExtentReports/AutomationSuiteReport.html");
         sparkReporter.config().setDocumentTitle("Automation Test Report");
         sparkReporter.config().setReportName("Test Execution Results");
@@ -59,7 +60,7 @@ public class ExtentReportManager extends BasePage {
         return extentReports;
     }
 
-    public static void beforeScenario(Scenario scenario) {
+    public void beforeScenario(Scenario scenario) {
         threadLocalScenario.set(scenario);
 
         String featureFileName = FilenameUtils.getBaseName(threadLocalScenario.get().getUri().toString());
@@ -71,14 +72,14 @@ public class ExtentReportManager extends BasePage {
         threadLocalScenarioSteps.get().addAll(getAllScenarioSteps());
     }
 
-    public static void afterScenarioStep(){
+    public void afterScenarioStep(){
         if(!threadLocalScenarioSteps.get().isEmpty()){
             PickleStepTestStep step = threadLocalScenarioSteps.get().pop();
             logStep(step, false);
         }
     }
 
-    public static void afterScenarioCleanup(){
+    public void afterScenarioCleanup(){
         if(!threadLocalScenarioSteps.get().isEmpty()) {
             while (!threadLocalScenarioSteps.get().isEmpty()){
                 PickleStepTestStep step = threadLocalScenarioSteps.get().pop();
@@ -91,7 +92,7 @@ public class ExtentReportManager extends BasePage {
 
     }
 
-    private static List<PickleStepTestStep> getAllScenarioSteps() {
+    private List<PickleStepTestStep> getAllScenarioSteps() {
         Field d;
         TestCaseState tcs;
         Field tc;
@@ -136,7 +137,7 @@ public class ExtentReportManager extends BasePage {
         return scenarioSteps;
     }
 
-    private static void logStep(PickleStepTestStep step, Boolean testPreviouslyFailed){
+    private void logStep(PickleStepTestStep step, Boolean testPreviouslyFailed){
         String stepText = "<span style='color: white; font-weight: bold;'>" + step.getStep().getText() + "</span>";
         String keyword = step.getStep().getKeyword().toLowerCase().trim();
         ExtentTest stepNode;
@@ -155,9 +156,9 @@ public class ExtentReportManager extends BasePage {
         } else if(threadLocalScenario.get().isFailed()){
             stepNode.fail(MarkupHelper.createLabel("Step has failed.", ExtentColor.RED));
             // todo - fix this jank around error logging
-            //log.error("Error occurred in the \"{}\" step resulting in the error: {}", step.getStep().getText(), CucumberStepListener.getFailedStepError());
+            log.error("Error occurred in the \"{}\" step resulting in the error: {}", step.getStep().getText(), CucumberStepListener.getFailedStepError());
             //stepNode.log(Status.INFO, MarkupHelper.createLabel(CucumberStepListener.getFailedStepError(), ExtentColor.BLUE));
-            stepNode.log(Status.INFO, "<div class='log-text'>" + CucumberStepListener.getFailedStepError() + "</div>");
+            //stepNode.log(Status.INFO, "<div class='log-text'>" + CucumberStepListener.getFailedStepError() + "</div>");
 
             stepNode.log(Status.INFO, MediaEntityBuilder.createScreenCaptureFromBase64String("data:image/png;base64," + takeScreenshot()).build());
         } else {
@@ -165,14 +166,12 @@ public class ExtentReportManager extends BasePage {
         }
     }
 
-    private static String takeScreenshot(){
+    private String takeScreenshot(){
         // todo - ignore screenshot if PID
         return ((TakesScreenshot) pageIndex().getDriverPage().getWebDriver()).getScreenshotAs(OutputType.BASE64);
     }
 
-    public static void flushReport(){
-        if (extentReports != null){
-            extentReports.flush();
-        }
+    public void flushReport(){
+        extentReports.flush();
     }
 }

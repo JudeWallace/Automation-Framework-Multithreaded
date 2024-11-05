@@ -45,7 +45,7 @@ public class ParallelExecutionTest {
                                 if (!executorService.awaitTermination(10, TimeUnit.MINUTES)) {
                                         executorService.shutdownNow();
                                 }
-                                ExtentReportManager.flushReport();
+                                //ExtentReportManager.flushReport();
                         } catch (InterruptedException e) {
                                 log.error("Thread pool interrupted while waiting for termination", e);
                                 executorService.shutdownNow();

@@ -4,9 +4,9 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class BasePage {
+public abstract class BasePage {
 
-    protected static @NonNull PageManager pageIndex(){
+    protected @NonNull PageManager pageIndex(){
         return PageManager.getInstance();
     }
 

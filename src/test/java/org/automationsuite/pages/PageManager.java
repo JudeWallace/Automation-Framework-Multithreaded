@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 
 @Data
-public class PageManager{
+public class PageManager {
 
     private static final ThreadLocal<PageManager> instance = ThreadLocal.withInitial(PageManager::new);
 

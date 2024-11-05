@@ -51,4 +51,5 @@ public class CucumberStepListener implements ConcurrentEventListener {
         // Remove special characters if needed
         return formattedError.toString().replaceAll("[<>\\[\\]]", "");
     }
+
 }

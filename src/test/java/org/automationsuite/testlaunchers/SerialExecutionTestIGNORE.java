@@ -42,7 +42,7 @@ public class SerialExecutionTestIGNORE {
 
         try {
             runtime.run();
-            ExtentReportManager.flushReport();
+            //ExtentReportManager.flushReport();
         } catch (Exception ex) {
             System.exit(1);
         }
