@@ -4,9 +4,6 @@ pipelines:
   default:
     - step:
         name: Build and Test with Docker Compose
-        caches:
-          - docker
-          - maven
         script:
           - echo "Starting Docker setup without Docker-in-Docker..."
           - docker --version
