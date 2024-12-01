@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ExtentReportManager extends BasePage {
 
-    private final ExtentReports extentReports = init();
+    private static final ExtentReports extentReports = init();
     private final ConcurrentHashMap<String, ExtentTest> featureTests = new ConcurrentHashMap<>();
 
     private final ThreadLocal<Scenario> threadLocalScenario = new ThreadLocal<>();
@@ -38,7 +38,7 @@ public class ExtentReportManager extends BasePage {
     private final ThreadLocal<Deque<PickleStepTestStep>> threadLocalScenarioSteps = ThreadLocal.withInitial(LinkedList::new);
 
 
-    private ExtentReports init(){
+    private static ExtentReports init(){
         ExtentSparkReporter sparkReporter = new ExtentSparkReporter("target/ExtentReports/AutomationSuiteReport.html");
         sparkReporter.config().setDocumentTitle("Automation Test Report");
         sparkReporter.config().setReportName("Test Execution Results");
@@ -156,9 +156,9 @@ public class ExtentReportManager extends BasePage {
         } else if(threadLocalScenario.get().isFailed()){
             stepNode.fail(MarkupHelper.createLabel("Step has failed.", ExtentColor.RED));
             // todo - fix this jank around error logging
-            log.error("Error occurred in the \"{}\" step resulting in the error: {}", step.getStep().getText(), CucumberStepListener.getFailedStepError());
-            //stepNode.log(Status.INFO, MarkupHelper.createLabel(CucumberStepListener.getFailedStepError(), ExtentColor.BLUE));
-            //stepNode.log(Status.INFO, "<div class='log-text'>" + CucumberStepListener.getFailedStepError() + "</div>");
+            String errStack = CucumberStepListener.getFailedStepError();
+            log.error("Error occurred in the \"{}\" step resulting in the error: {}", step.getStep().getText(), errStack);
+            stepNode.log(Status.INFO, "<div class='log-text'>" + errStack + "</div>");
 
             stepNode.log(Status.INFO, MediaEntityBuilder.createScreenCaptureFromBase64String("data:image/png;base64," + takeScreenshot()).build());
         } else {
@@ -167,11 +167,10 @@ public class ExtentReportManager extends BasePage {
     }
 
     private String takeScreenshot(){
-        // todo - ignore screenshot if PID
         return ((TakesScreenshot) pageIndex().getDriverPage().getWebDriver()).getScreenshotAs(OutputType.BASE64);
     }
 
-    public void flushReport(){
+    public static void flushReport(){
         extentReports.flush();
     }
 }

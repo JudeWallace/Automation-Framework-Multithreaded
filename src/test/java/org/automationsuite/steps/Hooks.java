@@ -17,7 +17,6 @@ public class Hooks extends BasePage {
 
     @Before
     public void beforeScenarioSetup(Scenario scenario){
-        log.info("Setting up the webdriver..");
         pageIndex().getDriverPage().createWebBrowser();
         extentReportManager.beforeScenario(scenario);
     }
@@ -30,7 +29,6 @@ public class Hooks extends BasePage {
 
     @After
     public void afterScenario() {
-        // Exit driver thread
         pageIndex().getDriverPage().driverShutdown();
         PageManager.cleanup();
         extentReportManager.afterScenarioCleanup();

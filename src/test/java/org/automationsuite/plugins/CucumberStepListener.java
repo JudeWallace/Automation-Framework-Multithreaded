@@ -16,7 +16,6 @@ public class CucumberStepListener implements ConcurrentEventListener {
      */
     public static String getFailedStepError() {
         String err = failedStepError.get();
-        System.out.println(err);
         failedStepError.remove();
         return err;
     }

@@ -14,7 +14,7 @@ public enum WebDriverDefinition {
     WEBKIT(() -> {
 
         if(!Boolean.parseBoolean(System.getenv("PIPELINE_EXECUTION"))) {
-            System.setProperty("webdriver.chrome.driver", "src/test/resources/chromedriver.exe");
+            System.setProperty("webdriver.chrome.driver", "src/test/resources/chromedriver");
 
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--remote-allow-origins=*");//, "--headless");
@@ -23,6 +23,7 @@ public enum WebDriverDefinition {
         else {
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
+            options.addArguments("--remote-allow-origins=*");
             try {
                 return new RemoteWebDriver(new URI("http://localhost:4444/wd/hub").toURL(), options);
             } catch (Exception e) {

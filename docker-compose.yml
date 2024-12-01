@@ -16,6 +16,7 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
     depends_on:
       - selenium-hub
+    shm_size: 2g
 
   chrome-node-2:
     image: selenium/node-chrome:4.0.0
@@ -25,3 +26,4 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
     depends_on:
       - selenium-hub
+    shm_size: 2g
